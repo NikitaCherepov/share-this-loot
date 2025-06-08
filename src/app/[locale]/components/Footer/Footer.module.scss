@@ -3,7 +3,7 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 80px;
+    height: 50px;
 
     z-index: 1;
     position: relative;
@@ -12,8 +12,9 @@
 
     border: var(--bd-standart);
 
-    p {
+    p,a {
         color: black;
+        font-size: 0.9rem;
     }
 
     .stylishLink {

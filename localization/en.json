@@ -36,6 +36,8 @@
     "close": "Close",
     "delete": "Delete",
     "coin": "coin",
-    "made_by": "Made by"
+    "made_by": "Made by",
+    "share_this_loot": "Share this loot",
+    "distribute_loot_equally": "Distribute your DnD loot equally among players"
   }
 }
