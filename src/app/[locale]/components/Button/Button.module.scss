@@ -1,0 +1,23 @@
+.container {
+    background: var(--white);
+
+    width: 100%;
+    height: fit-content;
+
+    max-width: 300px;
+    padding: 10px 5px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    font-size: var(--md-fs);
+    border-radius: var(--br-standart);
+    border: var(--bd-standart);
+    user-select: none;
+}
+.container:hover {
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.494));
+}

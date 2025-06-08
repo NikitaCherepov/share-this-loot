@@ -1,0 +1,48 @@
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 80px;
+
+    z-index: 1;
+    position: relative;
+
+    margin-top: 50px;
+
+    border: var(--bd-standart);
+
+    p {
+        color: black;
+    }
+
+    .stylishLink {
+  position: relative;
+  color: rgb(55, 55, 40); // твой цвет, можешь сменить
+  text-decoration: none;
+  padding-bottom: 2px;
+  transition: color 0.2s;
+
+  &::after {
+    content: "";
+    display: block;
+    position: absolute;
+    left: 0; bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: black; // цвет подчёркивания
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  &:hover,
+  &:focus {
+    color: black; // цвет текста при ховере
+    &::after {
+      transform: scaleX(1);
+    }
+  }
+}
+
+}
