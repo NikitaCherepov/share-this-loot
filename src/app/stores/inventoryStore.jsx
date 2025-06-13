@@ -9,7 +9,7 @@ class InventoryStore {
 
     players = []
     remainder = [];
-    onlyCoins = true;
+    onlyCoins = false;
 
     storeLoad = false;
 
@@ -92,11 +92,13 @@ class InventoryStore {
         this.save();
     }
 
-    clear() {
+    clear(text) {
+      if (confirm(text)) {
         this.commonInventory = [];
         this.players = [];
         this.remainder = {};
         this.save();
+      }
     }
 
     playerIncrement() {

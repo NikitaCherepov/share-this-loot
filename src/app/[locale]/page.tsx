@@ -43,7 +43,7 @@ const Home = observer(() => {
           {t("loot_distribution")}
         </h1>
         <Button text={'add'} onClick={() => toggleModal()}/>
-        <Button color={'#CC0000'} text={'clear_list'} onClick={() => inventoryStore.clear()}/>
+        <Button color={'#CC0000'} text={'clear_list'} onClick={() => inventoryStore.clear(t('clear_all'))}/>
       </div>
 
       <div className={styles.list}>
