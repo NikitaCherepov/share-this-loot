@@ -58,6 +58,15 @@ class InventoryStore {
         );
     }
 
+    checkAndMarkVisit() {
+      if (typeof window === 'undeinfed') return false;
+
+      const already = localStorage.getItem('VISIT_KEY');
+      if (already) return false;
+      localStorage.setItem('VISIT_KEY', true);
+      return true;
+    }
+
     toggleOnlyCoins() {
         this.onlyCoins = !this.onlyCoins;
     }

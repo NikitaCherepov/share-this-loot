@@ -26,6 +26,18 @@ const Home = observer(() => {
   }
 
   useEffect(() => {
+    const wasHere = inventoryStore.checkAndMarkVisit();
+
+    if (wasHere) {
+      fetch('/api/visit', { method: 'POST' })
+        .then(r => r.json())
+        .then(() => fetch('/api/visit'))
+        .then(r => r.json())
+    }
+
+  }, [])
+
+  useEffect(() => {
         inventoryStore.load();
   }, [])
 
