@@ -82,7 +82,12 @@ const Home = observer(() => {
         </div>
       </div>
 
-      <Button text={'distribute'} onClick={() => inventoryStore.distributeCoins()}/>
+      <Button text={'distribute'} onClick={() => {
+        fetch('/api/distribute', { method: 'POST' })
+        .then(r => r.json())
+        .then(() => fetch('/api/visit'))
+        .then(r => r.json())
+        inventoryStore.distributeCoins()}}/>
 
       <div className={`column-block ${styles.finals}`}>
         <h2>{t("total")}</h2>
