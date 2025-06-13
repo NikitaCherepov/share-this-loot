@@ -112,6 +112,7 @@ export default function Modal({state, onClose, object}: ModalProps){
                 )}
                 {type === 'other' && (
                     <input 
+                    type="number"
                     {...register('cost', {
                         required: t("enter_count"),
                         valueAsNumber: true, // превращает строку в число
