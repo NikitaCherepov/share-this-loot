@@ -41,6 +41,7 @@
     "distribute_loot_equally": "Distribute your DnD loot equally among players",
     "clear_all": "Are you sure you want to clear the list?",
     "share": "Share",
-    "copied": "Link copied!"
+    "copied": "Link copied!",
+    "overwrite_data_warning": "You already have data. Do you want to overwrite it with the shared link data?"
   }
 }

@@ -62,7 +62,17 @@ const Home = observer(() => {
             const shareData = params.get('data');
 
             if (shareData) {
-                inventoryStore.loadFromShare(shareData)
+                inventoryStore.load();
+
+                const hasData = inventoryStore.commonInventory.length > 0 || inventoryStore.playerCounter > 0;
+
+                if (hasData) {
+                    if (confirm(t('overwrite_data_warning'))) {
+                        inventoryStore.loadFromShare(shareData);
+                    }
+                } else {
+                    inventoryStore.loadFromShare(shareData);
+                }
 
                 setTimeout(() => {
                 window.history.replaceState({}, '', window.location.pathname);
