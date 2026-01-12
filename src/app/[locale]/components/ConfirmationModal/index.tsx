@@ -1,13 +1,20 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import Button from '../Button';
 import styles from './index.module.scss';
 
-let confirmFunction = null;
+type ConfirmConfig = {
+  message: string;
+  resolve: (result: boolean) => void;
+};
 
-export const confirmWithModal = (message) => {
+type ConfirmFunction = (message: string) => Promise<boolean>;
+
+let confirmFunction: ConfirmFunction | null = null;
+
+export const confirmWithModal: ConfirmFunction = (message: string): Promise<boolean> => {
   if (confirmFunction) {
     return confirmFunction(message);
   }
@@ -16,16 +23,26 @@ export const confirmWithModal = (message) => {
 
 export default function ConfirmationModal() {
   const t = useTranslations("HomePage");
-  const [config, setConfig] = useState(null);
+  const [config, setConfig] = useState<ConfirmConfig | null>(null);
+
+  const handleConfirm = useCallback(() => {
+    config?.resolve(true);
+    setConfig(null);
+  }, [config]);
+
+  const handleCancel = useCallback(() => {
+    config?.resolve(false);
+    setConfig(null);
+  }, [config]);
 
   useEffect(() => {
-    confirmFunction = (message) => {
-      return new Promise((resolve) => {
+    confirmFunction = (message: string): Promise<boolean> => {
+      return new Promise<boolean>((resolve) => {
         setConfig({ message, resolve });
       });
     };
 
-    const handleEscape = (e) => {
+    const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && config) {
         handleCancel();
       }
@@ -37,17 +54,7 @@ export default function ConfirmationModal() {
       document.removeEventListener('keydown', handleEscape);
       confirmFunction = null;
     };
-  }, []);
-
-  const handleConfirm = () => {
-    config?.resolve(true);
-    setConfig(null);
-  };
-
-  const handleCancel = () => {
-    config?.resolve(false);
-    setConfig(null);
-  };
+  }, [config, handleCancel]);
 
   return (
     <AnimatePresence>
