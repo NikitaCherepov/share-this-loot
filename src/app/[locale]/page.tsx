@@ -12,6 +12,7 @@ import {AnimatePresence, motion} from 'framer-motion'
 
 import { useState, useEffect } from "react"
 import Modal from "./components/Modal/Modal"
+import ConfirmationModal, { confirmWithModal } from "./components/ConfirmationModal"
 
 const Home = observer(() => {
   const t = useTranslations("HomePage")
@@ -56,32 +57,36 @@ const Home = observer(() => {
   }, [])
 
   useEffect(() => {
+        const loadFromURL = async () => {
+            if (typeof window !== 'undefined') {
+                const params = new URLSearchParams(window.location.search);
+                const shareData = params.get('data');
 
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            const shareData = params.get('data');
+                if (shareData) {
+                    inventoryStore.load();
 
-            if (shareData) {
-                inventoryStore.load();
+                    const hasData = inventoryStore.commonInventory.length > 0 || inventoryStore.playerCounter > 0;
 
-                const hasData = inventoryStore.commonInventory.length > 0 || inventoryStore.playerCounter > 0;
-
-                if (hasData) {
-                    if (confirm(t('overwrite_data_warning'))) {
+                    if (hasData) {
+                        const shouldOverwrite = await confirmWithModal(t('overwrite_data_warning'));
+                        if (shouldOverwrite) {
+                            inventoryStore.loadFromShare(shareData);
+                        }
+                    } else {
                         inventoryStore.loadFromShare(shareData);
                     }
-                } else {
-                    inventoryStore.loadFromShare(shareData);
-                }
 
-                setTimeout(() => {
-                window.history.replaceState({}, '', window.location.pathname);
-                }, 10)
+                    setTimeout(() => {
+                    window.history.replaceState({}, '', window.location.pathname);
+                    }, 10)
+                }
+                else {
+                  inventoryStore.load();
+                }
             }
-            else {
-              inventoryStore.load();
-            }
-        }
+        };
+
+        loadFromURL();
   }, [])
 
   const [object, setObject] = useState();
@@ -90,6 +95,7 @@ const Home = observer(() => {
     <div className={styles.container}>
       <AnimatePresence>
         {modal && <Modal key="modal" state={modal} onClose={() => toggleModal()} object={object}/>}
+        <ConfirmationModal />
       </AnimatePresence>
 
 
