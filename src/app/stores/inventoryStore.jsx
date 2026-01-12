@@ -32,6 +32,35 @@ class InventoryStore {
     /** ────── LOCAL STORAGE ────── */
     LS_KEY = "dnd-common-inventory";
 
+    encodeState() {
+        const state = {
+            commonInventory: toJS(this.commonInventory),
+            playerCounter: this.playerCounter
+        };
+        return btoa(encodeURIComponent(JSON.stringify(state)));
+    }
+
+    decodeState(encoded) {
+        try {
+            const decoded = decodeURIComponent(atob(encoded));
+            return JSON.parse(decoded);
+        } catch {
+            return null;
+        }
+    }
+
+    loadFromShare(encoded) {
+        const state = this.decodeState(encoded);
+        if (!state) return false;
+
+        runInAction(() => {
+            this.commonInventory = state.commonInventory ?? [];
+            this.playerCounter = state.playerCounter ?? 0;
+        });
+        this.save();
+        return true;
+    }
+
     /** грузим один-раз, только на клиенте */
     load() {
         if (typeof window === "undefined") return;

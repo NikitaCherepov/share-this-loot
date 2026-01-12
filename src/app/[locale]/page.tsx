@@ -17,12 +17,30 @@ const Home = observer(() => {
   const t = useTranslations("HomePage")
   const [modal, setModal] = useState(false);
   const [update, setUpdate] = useState();
+  const [copySuccess, setCopySuccess] = useState('');
 
   const toggleModal = () => {
     if (modal) {
       setObject(undefined);
     }
     setModal((prev) => !prev)
+  }
+
+  const handleShare = async () => {
+    if (typeof window === 'undefined') return;
+
+    const encodedData = inventoryStore.encodeState();
+    const shareUrl = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopySuccess(t('copied') || 'Ссылка скопирована!');
+      setTimeout(() => setCopySuccess(''), 3000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      setCopySuccess('Ошибка при копировании');
+      setTimeout(() => setCopySuccess(''), 3000);
+    }
   }
 
   useEffect(() => {
@@ -38,7 +56,22 @@ const Home = observer(() => {
   }, [])
 
   useEffect(() => {
-        inventoryStore.load();
+
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const shareData = params.get('data');
+
+            if (shareData) {
+                inventoryStore.loadFromShare(shareData)
+
+                setTimeout(() => {
+                window.history.replaceState({}, '', window.location.pathname);
+                }, 10)
+            }
+            else {
+              inventoryStore.load();
+            }
+        }
   }, [])
 
   const [object, setObject] = useState();
@@ -158,6 +191,11 @@ const Home = observer(() => {
         )}
 
 
+      </div>
+
+      <div className={`column-block`} style={{ marginTop: '20px' }}>
+        <Button text={'share'} onClick={handleShare} />
+        {copySuccess && <p style={{ marginTop: '10px', color: '#4CAF50' }}>{copySuccess}</p>}
       </div>
     </div>
   )

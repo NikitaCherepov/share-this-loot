@@ -39,6 +39,8 @@
     "made_by": "Made by",
     "share_this_loot": "Share this loot",
     "distribute_loot_equally": "Distribute your DnD loot equally among players",
-    "clear_all": "Are you sure you want to clear the list?"
+    "clear_all": "Are you sure you want to clear the list?",
+    "share": "Share",
+    "copied": "Link copied!"
   }
 }
