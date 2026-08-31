@@ -65,7 +65,9 @@ export default function TraitsBrowser({ traits }: TraitsBrowserProps) {
   // умный поиск
   const [smartQuery, setSmartQuery] = useState('')
   const [semantic, setSemantic] = useState<SemanticMatch[]>([])
-  const [smartStatus, setSmartStatus] = useState<'' | 'loading' | 'error' | 'unavailable'>('')
+  const [smartStatus, setSmartStatus] = useState<
+    '' | 'loading' | 'error' | 'unavailable' | 'cooldown'
+  >('')
 
   const options = useMemo(() => getTraitFilterOptions(traits), [traits])
 
@@ -106,6 +108,12 @@ export default function TraitsBrowser({ traits }: TraitsBrowserProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query, locale, section: 'traits' }),
       })
+      if (res.status === 429) {
+        setSemantic([])
+        setSmartStatus('cooldown')
+        return
+      }
+
       const data = await res.json()
 
       if (!res.ok) throw new Error(data?.error || 'smart search failed')
@@ -210,6 +218,9 @@ export default function TraitsBrowser({ traits }: TraitsBrowserProps) {
 
       {smartStatus === 'loading' && <p className={styles.smartStatus}>{t('smart_search_searching')}</p>}
       {smartStatus === 'error' && <p className={styles.smartStatus}>{t('smart_search_error')}</p>}
+      {smartStatus === 'cooldown' && (
+        <p className={styles.smartStatus}>{t('smart_search_cooldown')}</p>
+      )}
       {smartStatus === 'unavailable' && (
         <p className={styles.smartStatus}>{t('smart_search_unavailable')}</p>
       )}
