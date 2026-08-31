@@ -1,0 +1,5 @@
+# Формат запроса — OpenAI-совместимый (Ollama /v1/embeddings, LM Studio, vLLM, OpenAI и т.п.)
+
+EMBEDDING_API_URL=
+EMBEDDING_MODEL=
+EMBEDDING_API_KEY=

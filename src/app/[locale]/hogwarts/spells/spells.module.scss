@@ -53,6 +53,79 @@
   }
 }
 
+.smartBlock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.smartInput {
+  flex: 1;
+  min-width: 0;
+
+  padding: 10px 18px;
+
+  background: var(--white);
+  border: 1px dashed #8b6f1f88;
+  border-radius: 999px;
+
+  font-family: inherit;
+  font-size: var(--sm-fs);
+  color: inherit;
+
+  &:focus {
+    outline: 2px solid #8b6f1f44;
+  }
+}
+
+.smartButton {
+  flex: none;
+
+  padding: 8px 16px;
+
+  background: var(--yellow);
+  border: var(--bd-standart);
+  border-radius: 999px;
+
+  font-family: inherit;
+  font-size: var(--sm-fs);
+  color: inherit;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.smartClear {
+  flex: none;
+
+  width: 36px;
+  height: 36px;
+
+  background: var(--white);
+  border: var(--bd-standart);
+  border-radius: 999px;
+
+  font-family: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--yellow);
+  }
+}
+
+.smartStatus {
+  font-size: var(--sm-fs);
+  opacity: 0.7;
+  text-align: center;
+  margin-top: -4px;
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -125,6 +198,11 @@
 
 .sortButtonActive {
   background: var(--yellow);
+}
+
+.sortButton:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 
 .panel {

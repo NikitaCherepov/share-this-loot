@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import type { Spell } from '@/data/hogwarts'
 import LanguageSelector from '../components/LanguageSelector'
@@ -42,6 +42,13 @@ function Chip({ label, active, onClick }: ChipProps) {
   )
 }
 
+interface SemanticMatch {
+  id: string
+  score: number
+}
+
+type UiSortMode = SortMode | 'score'
+
 interface SpellsBrowserProps {
   spells: Spell[]
 }
@@ -49,18 +56,85 @@ interface SpellsBrowserProps {
 export default function SpellsBrowser({ spells }: SpellsBrowserProps) {
   const t = useTranslations('SpellsPage')
   const th = useTranslations('HogwartsPage')
+  const locale = useLocale()
 
   const [filters, setFilters] = useState<SpellFilters>(emptyFilters)
   const [showFilters, setShowFilters] = useState(false)
   const [showAllKeywords, setShowAllKeywords] = useState(false)
-  const [sort, setSort] = useState<SortMode>('level')
+  const [sort, setSort] = useState<UiSortMode>('level')
+
+  // умный поиск
+  const [smartQuery, setSmartQuery] = useState('')
+  const [semantic, setSemantic] = useState<SemanticMatch[]>([])
+  const [smartStatus, setSmartStatus] = useState<'' | 'loading' | 'error' | 'unavailable'>('')
 
   const options = useMemo(() => getFilterOptions(spells), [spells])
-  const visible = useMemo(
-    () => sortSpells(filterSpells(spells, filters), sort),
-    [spells, filters, sort]
-  )
-  const activeCount = activeFiltersCount(filters)
+
+  const visible = useMemo(() => {
+    let list = filterSpells(spells, filters)
+
+    if (semantic.length > 0) {
+      const order = new Map(semantic.map((match, index) => [match.id, index]))
+      list = list.filter((spell) => order.has(spell.id))
+      if (sort === 'score') {
+        list = [...list].sort((a, b) => order.get(a.id)! - order.get(b.id)!)
+      } else {
+        list = sortSpells(list, sort as SortMode)
+      }
+    } else {
+      list = sortSpells(list, sort as SortMode)
+    }
+
+    return list
+  }, [spells, filters, sort, semantic])
+
+  const activeCount = activeFiltersCount(filters) + (semantic.length > 0 ? 1 : 0)
+
+  const clearSmart = () => {
+    setSemantic([])
+    setSmartQuery('')
+    setSmartStatus('')
+  }
+
+  const runSmartSearch = async () => {
+    const query = smartQuery.trim()
+    if (!query || smartStatus === 'loading') return
+
+    setSmartStatus('loading')
+    try {
+      const res = await fetch('/api/smart-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, locale }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) throw new Error(data?.error || 'smart search failed')
+      if (!data.indexed) {
+        setSemantic([])
+        setSmartStatus('unavailable')
+        return
+      }
+
+      setSemantic(data.results ?? [])
+      setSort('score')
+      setSmartStatus('')
+    } catch {
+      setSemantic([])
+      setSmartStatus('error')
+    }
+  }
+
+  const handleSortClick = (mode: UiSortMode) => {
+    if (mode !== 'score' && semantic.length > 0) clearSmart()
+    setSort(mode)
+  }
+
+  const resetAll = () => {
+    setFilters(emptyFilters)
+    setShowAllKeywords(false)
+    clearSmart()
+  }
 
   const patch = (next: Partial<SpellFilters>) => setFilters((prev) => ({ ...prev, ...next }))
 
@@ -107,6 +181,48 @@ export default function SpellsBrowser({ spells }: SpellsBrowserProps) {
         onChange={(e) => patch({ search: e.target.value })}
       />
 
+      <div className={styles.smartBlock}>
+        <input
+          className={styles.smartInput}
+          type="search"
+          placeholder={t('smart_search_placeholder')}
+          value={smartQuery}
+          onChange={(e) => setSmartQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') runSmartSearch()
+          }}
+          disabled={smartStatus === 'loading'}
+        />
+        <button
+          type="button"
+          className={styles.smartButton}
+          onClick={runSmartSearch}
+          disabled={smartStatus === 'loading' || smartQuery.trim().length === 0}
+        >
+          {smartStatus === 'loading' ? t('smart_search_searching') : t('smart_search_button')}
+        </button>
+        {semantic.length > 0 && (
+          <button
+            type="button"
+            className={styles.smartClear}
+            onClick={clearSmart}
+            title={t('reset')}
+            aria-label={t('reset')}
+          >
+            ×
+          </button>
+        )}
+      </div>
+
+      {smartStatus === 'loading' && <p className={styles.smartStatus}>{t('smart_search_searching')}</p>}
+      {smartStatus === 'error' && <p className={styles.smartStatus}>{t('smart_search_error')}</p>}
+      {smartStatus === 'unavailable' && (
+        <p className={styles.smartStatus}>{t('smart_search_unavailable')}</p>
+      )}
+      {smartStatus === '' && semantic.length > 0 && (
+        <p className={styles.smartStatus}>{t('smart_search_results', { count: semantic.length })}</p>
+      )}
+
       <div className={styles.toolbar}>
         <button
           type="button"
@@ -119,14 +235,7 @@ export default function SpellsBrowser({ spells }: SpellsBrowserProps) {
         </button>
 
         {activeCount > 0 && (
-          <button
-            type="button"
-            className={styles.toolbarButton}
-            onClick={() => {
-              setFilters(emptyFilters)
-              setShowAllKeywords(false)
-            }}
-          >
+          <button type="button" className={styles.toolbarButton} onClick={resetAll}>
             {t('reset')}
           </button>
         )}
@@ -135,16 +244,24 @@ export default function SpellsBrowser({ spells }: SpellsBrowserProps) {
           <button
             type="button"
             className={`${styles.sortButton} ${sort === 'level' ? styles.sortButtonActive : ''}`}
-            onClick={() => setSort('level')}
+            onClick={() => handleSortClick('level')}
           >
             {t('by_level')}
           </button>
           <button
             type="button"
             className={`${styles.sortButton} ${sort === 'name' ? styles.sortButtonActive : ''}`}
-            onClick={() => setSort('name')}
+            onClick={() => handleSortClick('name')}
           >
             {t('by_name')}
+          </button>
+          <button
+            type="button"
+            className={`${styles.sortButton} ${sort === 'score' ? styles.sortButtonActive : ''}`}
+            onClick={() => handleSortClick('score')}
+            disabled={semantic.length === 0}
+          >
+            {t('by_score')}
           </button>
         </div>
       </div>
@@ -235,11 +352,7 @@ export default function SpellsBrowser({ spells }: SpellsBrowserProps) {
         <div className={styles.empty}>
           <p>{t('nothing_found')}</p>
           <p className={styles.emptyHint}>{t('nothing_found_hint')}</p>
-          <button
-            type="button"
-            className={styles.toolbarButton}
-            onClick={() => setFilters(emptyFilters)}
-          >
+          <button type="button" className={styles.toolbarButton} onClick={resetAll}>
             {t('reset')}
           </button>
         </div>
