@@ -1,0 +1,165 @@
+.container {
+  background: var(--white);
+  border: var(--bd-standart);
+  border-radius: var(--br-standart);
+
+  overflow: hidden;
+
+  transition: box-shadow 0.15s ease;
+
+  &.open {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'title chevron'
+    'meta chevron';
+  align-items: center;
+  column-gap: 10px;
+
+  width: 100%;
+  padding: 12px 16px;
+
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+}
+
+.titleRow {
+  grid-area: title;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.name {
+  font-size: var(--bg-fs);
+  line-height: 1.2;
+}
+
+.marker {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.ritualMarker {
+  background: var(--yellow);
+  border: 1px solid #8b6f1f55;
+  color: #5c4a12;
+}
+
+.metaRow {
+  grid-area: meta;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.typeBadge,
+.levelBadge {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.typeBadge {
+  background: #5c0a0a;
+  color: var(--white);
+}
+
+.levelBadge {
+  background: none;
+  border: 1px solid #00000055;
+}
+
+.chevron {
+  grid-area: chevron;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid #00000088;
+  border-bottom: 2px solid #00000088;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 0.2s ease;
+
+  .open & {
+    transform: rotate(225deg) translate(-2px, -2px);
+  }
+}
+
+.expandable {
+  overflow: hidden;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  padding: 4px 16px 16px;
+  border-top: 1px dashed #00000033;
+  margin: 0 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+  margin-top: 12px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  dt {
+    font-size: 0.8rem;
+    opacity: 0.6;
+  }
+
+  dd {
+    font-size: var(--sm-fs);
+  }
+}
+
+.keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.keyword {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--yellow);
+  font-size: 0.8rem;
+}
+
+.description {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  p {
+    font-size: var(--sm-fs);
+    line-height: 1.45;
+  }
+}
+
+@media (min-width: 640px) {
+  .stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

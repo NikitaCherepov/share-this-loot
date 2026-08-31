@@ -29,7 +29,7 @@ export default function RootLayout({
         <div className={styles.container}>
           <div className={styles.background}></div>
           <NextIntlClientProvider>
-            {children}
+            <main className={styles.main}>{children}</main>
           </NextIntlClientProvider>
           <Footer/>
         </div>

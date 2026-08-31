@@ -1,5 +1,5 @@
 .container {
-    min-height: 100vh;
+    flex: 1;
 
     padding: 40px 60px;
     position: relative;
@@ -39,4 +39,13 @@
     align-items: center;
 
     gap: 36px;
+}
+
+.hogwartsLink {
+    font-size: var(--sm-fs);
+    text-decoration: underline;
+
+    &:hover {
+        opacity: 1;
+    }
 }

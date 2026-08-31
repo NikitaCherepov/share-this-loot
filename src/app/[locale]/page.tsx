@@ -13,6 +13,7 @@ import {AnimatePresence, motion} from 'framer-motion'
 import { useState, useEffect } from "react"
 import Modal from "./components/Modal/Modal"
 import ConfirmationModal, { confirmWithModal } from "./components/ConfirmationModal"
+import { Link } from "@/i18n/navigation"
 
 const Home = observer(() => {
   const t = useTranslations("HomePage")
@@ -100,6 +101,9 @@ const Home = observer(() => {
 
 
       <div className={`column-block`}>
+        <Link href="/hogwarts" className={styles.hogwartsLink}>
+          {t("hogwarts_reference")}
+        </Link>
         <h1>
           {t("loot_distribution")}
         </h1>
