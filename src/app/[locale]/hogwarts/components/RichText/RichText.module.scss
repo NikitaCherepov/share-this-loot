@@ -1,0 +1,29 @@
+.description {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  p {
+    font-size: var(--sm-fs);
+    line-height: 1.45;
+  }
+
+  .list {
+    margin: 0;
+    padding-left: 22px;
+
+    font-size: var(--sm-fs);
+    line-height: 1.45;
+
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    // tailwind preflight срезает маркеры — возвращаем явно
+    list-style-type: disc;
+  }
+
+  .listOrdered {
+    list-style-type: decimal;
+  }
+}

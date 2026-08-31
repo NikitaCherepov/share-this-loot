@@ -4,45 +4,11 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { AnimatePresence, motion } from 'framer-motion'
 import type { Spell } from '@/data/hogwarts'
+import RichText from '../RichText'
 import styles from './SpellCard.module.scss'
 
 interface SpellCardProps {
   spell: Spell
-}
-
-const INLINE_TAG_RE = /<(strong|b|em|i)>([\s\S]*?)<\/\1>/gi
-
-/**
- * Превращает <strong>/<b> и <i>/<em> в жирный/курсив.
- * Всё остальное остаётся обычным текстом (экранируется React'ом).
- */
-function renderInline(text: string, keyPrefix = ''): React.ReactNode[] {
-  const nodes: React.ReactNode[] = []
-  const pattern = new RegExp(INLINE_TAG_RE.source, 'gi')
-  let lastIndex = 0
-  let match: RegExpExecArray | null
-  let key = 0
-
-  while ((match = pattern.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      nodes.push(text.slice(lastIndex, match.index))
-    }
-    const tag = match[1].toLowerCase()
-    const inner = renderInline(match[2], `${keyPrefix}${key}-`)
-    if (tag === 'strong' || tag === 'b') {
-      nodes.push(<strong key={`${keyPrefix}s${key}`}>{inner}</strong>)
-    } else {
-      nodes.push(<em key={`${keyPrefix}e${key}`}>{inner}</em>)
-    }
-    key++
-    lastIndex = pattern.lastIndex
-  }
-
-  if (lastIndex < text.length) {
-    nodes.push(text.slice(lastIndex))
-  }
-
-  return nodes
 }
 
 export default function SpellCard({ spell }: SpellCardProps) {
@@ -114,14 +80,7 @@ export default function SpellCard({ spell }: SpellCardProps) {
                 </div>
               )}
 
-              <div className={styles.description}>
-                {spell.description
-                  .split(/\r?\n/)
-                  .filter((paragraph) => paragraph.trim().length > 0)
-                  .map((paragraph, i) => (
-                    <p key={i}>{renderInline(paragraph)}</p>
-                  ))}
-              </div>
+              <RichText text={spell.description} />
             </div>
           </motion.div>
         )}

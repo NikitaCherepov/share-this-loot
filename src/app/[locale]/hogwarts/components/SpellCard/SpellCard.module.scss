@@ -147,17 +147,6 @@
   font-size: 0.8rem;
 }
 
-.description {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  p {
-    font-size: var(--sm-fs);
-    line-height: 1.45;
-  }
-}
-
 @media (min-width: 640px) {
   .stats {
     grid-template-columns: repeat(4, 1fr);

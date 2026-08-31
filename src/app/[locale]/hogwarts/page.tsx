@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { getSpells } from '@/data/hogwarts'
+import { getTraits } from '@/data/hogwarts/traits'
 import LanguageSelector from './components/LanguageSelector'
 import styles from './page.module.scss'
 
@@ -24,6 +25,7 @@ export default async function HogwartsPage({
   const { locale } = await params
   const t = await getTranslations('HogwartsPage')
   const spellsCount = getSpells(locale).length
+  const traitsCount = getTraits(locale).length
 
   return (
     <div className={styles.container}>
@@ -43,6 +45,11 @@ export default async function HogwartsPage({
         <Link href="/hogwarts/spells" className={`${styles.card} ${styles.active}`}>
           <h2>{t('spells')}</h2>
           <p className={styles.hint}>{t('spells_count', { count: spellsCount })}</p>
+        </Link>
+
+        <Link href="/hogwarts/traits" className={`${styles.card} ${styles.active}`}>
+          <h2>{t('traits')}</h2>
+          <p className={styles.hint}>{t('traits_count', { count: traitsCount })}</p>
         </Link>
 
         <div className={styles.card} aria-disabled="true">

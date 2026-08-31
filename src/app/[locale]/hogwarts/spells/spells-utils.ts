@@ -55,8 +55,9 @@ export function getFilterOptions(spells: Spell[]): FilterOptions {
 /**
  * Приводит текст к нижнему регистру и заменяет ё -> е,
  * чтобы поиск находил слова независимо от набора ё/е.
+ * Общая для всех разделов справочника.
  */
-function normalizeSearchText(text: string): string {
+export function normalizeSearchText(text: string): string {
   return text.trim().toLowerCase().replace(/ё/g, 'е')
 }
 
