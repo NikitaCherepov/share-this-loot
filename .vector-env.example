@@ -1,5 +1,18 @@
+# Эмбеддинги для умного поиска.
 # Формат запроса — OpenAI-совместимый (Ollama /v1/embeddings, LM Studio, vLLM, OpenAI и т.п.)
 
 EMBEDDING_API_URL=
 EMBEDDING_MODEL=
 EMBEDDING_API_KEY=
+
+# Реранкер (опционально): вторая ступень умного поиска.
+# Запрос: POST { model, query, documents: string[], top_n }
+# Ответ:  [{ index, score }]  или  { results: [{ index, relevance_score }] }
+# Пока url/model не заданы — поиск работает только на эмбеддингах.
+
+RERANK_API_URL=
+RERANK_MODEL=
+RERANK_API_KEY=
+
+# Порог релевантности: кандидаты с score ниже — отбрасываются (по умолчанию 0.1)
+# RERANK_MIN_SCORE=0.1

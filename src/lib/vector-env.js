@@ -32,3 +32,17 @@ export function getEmbeddingConfig() {
     apiKey: process.env.EMBEDDING_API_KEY || '',
   }
 }
+
+/**
+ * Реранкер (вторая ступень умного поиска).
+ * Если url/model не заданы — реранк просто не используется.
+ * minScore: кандидаты с оценкой ниже порога считаются нерелевантными.
+ */
+export function getRerankConfig() {
+  return {
+    url: process.env.RERANK_API_URL,
+    model: process.env.RERANK_MODEL,
+    apiKey: process.env.RERANK_API_KEY || '',
+    minScore: Number(process.env.RERANK_MIN_SCORE ?? 0.1),
+  }
+}
