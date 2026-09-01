@@ -9,7 +9,7 @@ import { checkRateLimit } from '@/lib/rate-limit'
 import { rerankDocuments } from '@/lib/reranker'
 
 /** Минимальный интервал между поисками с одного IP */
-const RATE_LIMIT_MS = 2000
+const RATE_LIMIT_MS = 5000
 
 /** Сколько отдавать, если реранкер не настроен */
 const EMBEDDING_TOP_N = 10

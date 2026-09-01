@@ -1,6 +1,6 @@
 import { checkRateLimit } from './rate-limit'
 
-const INTERVAL = 2000
+const INTERVAL = 5000
 
 // карта хранится в модуле, поэтому ключи между тестами не пересекаем
 describe('checkRateLimit', () => {
