@@ -4,6 +4,7 @@
 EMBEDDING_API_URL=
 EMBEDDING_MODEL=
 EMBEDDING_API_KEY=
+EMBEDDING_PROXY_URL=
 
 # Реранкер (опционально): вторая ступень умного поиска.
 # Запрос: POST { model, query, documents: string[], top_n }
@@ -13,6 +14,7 @@ EMBEDDING_API_KEY=
 RERANK_API_URL=
 RERANK_MODEL=
 RERANK_API_KEY=
+RERANK_PROXY_URL=
 
 # Порог релевантности: кандидаты с score ниже — отбрасываются (по умолчанию 0.1)
 # RERANK_MIN_SCORE=0.1

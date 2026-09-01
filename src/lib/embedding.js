@@ -1,16 +1,18 @@
+import { fetchWithProxy } from './proxy-fetch.mjs'
+
 /**
  * Запрос к OpenAI-совместимому embeddings-эндпоинту.
  * Работает с Ollama (/v1/embeddings), LM Studio, vLLM, OpenAI и т.п.
  */
-export async function embedText(text, { url, model, apiKey }) {
-  const res = await fetch(url, {
+export async function embedText(text, { url, model, apiKey, proxyUrl }) {
+  const res = await fetchWithProxy(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
     },
     body: JSON.stringify({ model, input: text }),
-  })
+  }, proxyUrl)
 
   if (!res.ok) {
     const body = await res.text().catch(() => '')

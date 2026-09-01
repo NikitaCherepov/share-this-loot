@@ -18,6 +18,8 @@
     "next": "15.3.8",
     "next-i18next": "^15.4.2",
     "next-intl": "^4.1.0",
+    "node-fetch": "^3.3.2",
+    "proxy-agent": "^8.0.2",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-hook-form": "^7.57.0",

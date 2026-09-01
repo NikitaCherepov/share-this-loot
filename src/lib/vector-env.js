@@ -30,6 +30,7 @@ export function getEmbeddingConfig() {
     url: process.env.EMBEDDING_API_URL,
     model: process.env.EMBEDDING_MODEL,
     apiKey: process.env.EMBEDDING_API_KEY || '',
+    proxyUrl: process.env.EMBEDDING_PROXY_URL || '',
   }
 }
 
@@ -43,6 +44,7 @@ export function getRerankConfig() {
     url: process.env.RERANK_API_URL,
     model: process.env.RERANK_MODEL,
     apiKey: process.env.RERANK_API_KEY || '',
+    proxyUrl: process.env.RERANK_PROXY_URL || '',
     minScore: Number(process.env.RERANK_MIN_SCORE ?? 0.1),
   }
 }

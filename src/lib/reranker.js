@@ -1,3 +1,5 @@
+import { fetchWithProxy } from './proxy-fetch.mjs'
+
 /**
  * Реранкер для умного поиска: оценивает кандидатов относительно запроса.
  *
@@ -42,15 +44,15 @@ export function parseRerankResponse(json) {
  * Отправляет кандидатов на реранк.
  * @returns {Promise<Array<{ index: number, score }>>}
  */
-export async function rerankDocuments(query, documents, topN, { url, model, apiKey }) {
-  const res = await fetch(url, {
+export async function rerankDocuments(query, documents, topN, { url, model, apiKey, proxyUrl }) {
+  const res = await fetchWithProxy(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
     },
     body: JSON.stringify({ model, query, documents, top_n: topN }),
-  })
+  }, proxyUrl)
 
   const text = await res.text()
 

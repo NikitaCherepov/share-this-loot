@@ -24,6 +24,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
+import { fetchWithProxy } from '../src/lib/proxy-fetch.mjs'
 
 const DATA_DIR = path.join(process.cwd(), 'src', 'data', 'hogwarts')
 
@@ -51,6 +52,7 @@ let config = {
   url: null,
   model: null,
   apiKey: '',
+  proxyUrl: '',
 }
 
 /* ---------- данные ---------- */
@@ -78,14 +80,14 @@ function extractEntries(data, section) {
 /* ---------- embedding api ---------- */
 
 async function embedText(text) {
-  const res = await fetch(config.url, {
+  const res = await fetchWithProxy(config.url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}),
     },
     body: JSON.stringify({ model: config.model, input: text }),
-  })
+  }, config.proxyUrl)
 
   if (!res.ok) {
     const body = await res.text().catch(() => '')
@@ -114,6 +116,7 @@ config = {
   url: process.env.EMBEDDING_API_URL,
   model: process.env.EMBEDDING_MODEL,
   apiKey: process.env.EMBEDDING_API_KEY || '',
+  proxyUrl: process.env.EMBEDDING_PROXY_URL || '',
 }
 
 if (!config.url || !config.model) {
