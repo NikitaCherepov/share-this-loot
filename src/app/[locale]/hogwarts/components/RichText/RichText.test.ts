@@ -30,21 +30,41 @@ describe('parseRichText', () => {
 
     expect(blocks).toEqual([
       { type: 'paragraph', text: 'Список:' },
-      { type: 'list', ordered: false, items: ['Один', 'Два'] },
+      {
+        type: 'list',
+        ordered: false,
+        items: [
+          { text: 'Один', lists: [] },
+          { text: 'Два', lists: [] },
+        ],
+      },
     ])
   })
 
   it('распознаёт <ol> как нумерованный список', () => {
     const blocks = parseRichText('<ol><li>Шаг 1</li><li>Шаг 2</li></ol>')
 
-    expect(blocks).toEqual([{ type: 'list', ordered: true, items: ['Шаг 1', 'Шаг 2'] }])
+    expect(blocks).toEqual([
+      {
+        type: 'list',
+        ordered: true,
+        items: [
+          { text: 'Шаг 1', lists: [] },
+          { text: 'Шаг 2', lists: [] },
+        ],
+      },
+    ])
   })
 
   it('оставляет инлайн-теги внутри пунктов списка как есть', () => {
     const blocks = parseRichText('<ul><li><strong>Жирный</strong> пункт</li></ul>')
 
     expect(blocks).toEqual([
-      { type: 'list', ordered: false, items: ['<strong>Жирный</strong> пункт'] },
+      {
+        type: 'list',
+        ordered: false,
+        items: [{ text: '<strong>Жирный</strong> пункт', lists: [] }],
+      },
     ])
   })
 
@@ -53,7 +73,11 @@ describe('parseRichText', () => {
 
     expect(blocks).toEqual([
       { type: 'paragraph', text: 'До.' },
-      { type: 'list', ordered: false, items: ['пункт'] },
+      {
+        type: 'list',
+        ordered: false,
+        items: [{ text: 'пункт', lists: [] }],
+      },
       { type: 'paragraph', text: 'После.' },
     ])
   })
@@ -62,9 +86,17 @@ describe('parseRichText', () => {
     const blocks = parseRichText('<ul><li>а</li></ul>Между<ul><li>б</li></ul>')
 
     expect(blocks).toEqual([
-      { type: 'list', ordered: false, items: ['а'] },
+      {
+        type: 'list',
+        ordered: false,
+        items: [{ text: 'а', lists: [] }],
+      },
       { type: 'paragraph', text: 'Между' },
-      { type: 'list', ordered: false, items: ['б'] },
+      {
+        type: 'list',
+        ordered: false,
+        items: [{ text: 'б', lists: [] }],
+      },
     ])
   })
 

@@ -14,13 +14,13 @@ describe('checkRateLimit', () => {
     const result = checkRateLimit('ip-fast', INTERVAL, 2500)
 
     expect(result.allowed).toBe(false)
-    expect(result.retryAfterMs).toBe(500)
+    expect(result.retryAfterMs).toBe(3500)
   })
 
   it('пропускает после истечения интервала', () => {
     checkRateLimit('ip-slow', INTERVAL, 1000)
 
-    expect(checkRateLimit('ip-slow', INTERVAL, 3000).allowed).toBe(true)
+    expect(checkRateLimit('ip-slow', INTERVAL, 6000).allowed).toBe(true)
   })
 
   it('ключи независимы друг от друга', () => {
@@ -32,8 +32,8 @@ describe('checkRateLimit', () => {
 
   it('не пускает прошедший запрос заново без нового интервала', () => {
     checkRateLimit('ip-chain', INTERVAL, 1000)
-    checkRateLimit('ip-chain', INTERVAL, 3000) // пропущен и записан
+    checkRateLimit('ip-chain', INTERVAL, 6000) // пропущен и записан
 
-    expect(checkRateLimit('ip-chain', INTERVAL, 3500).allowed).toBe(false)
+    expect(checkRateLimit('ip-chain', INTERVAL, 6500).allowed).toBe(false)
   })
 })
