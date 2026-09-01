@@ -17,6 +17,8 @@ const EMBEDDING_TOP_N = 10
 const RERANK_CANDIDATES = 20
 /** Сколько отдавать после реранка (вторая ступень) */
 const RERANK_TOP_N = 5
+/** Максимальная длина поискового запроса в символах */
+const MAX_QUERY_LENGTH = 200
 
 /** Достаёт ip клиента из заголовков (next start сидит за прокси или напрямую) */
 function getClientIp(request) {
@@ -66,6 +68,12 @@ export async function POST(request) {
 
   if (!query) {
     return NextResponse.json({ error: 'query is required' }, { status: 400 })
+  }
+  if (query.length > MAX_QUERY_LENGTH) {
+    return NextResponse.json(
+      { error: `query is too long (max ${MAX_QUERY_LENGTH} characters)` },
+      { status: 400 }
+    )
   }
 
   const { allowed, retryAfterMs } = checkRateLimit(

@@ -18,6 +18,8 @@ import {
 import styles from '../spells/spells.module.scss'
 
 const SKILLS_COLLAPSED = 10
+/** максимум символов в умном поиске — столько же проверяет api */
+const SMART_QUERY_MAX = 200
 
 function toggleValue<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
@@ -189,6 +191,7 @@ export default function TraitsBrowser({ traits }: TraitsBrowserProps) {
         <input
           className={styles.smartInput}
           type="search"
+          maxLength={SMART_QUERY_MAX}
           placeholder={t('smart_search_placeholder')}
           value={smartQuery}
           onChange={(e) => setSmartQuery(e.target.value)}
