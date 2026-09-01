@@ -64,7 +64,9 @@ export default function TraitsBrowser({ traits }: TraitsBrowserProps) {
 
   // умный поиск
   const [smartQuery, setSmartQuery] = useState('')
-  const [semantic, setSemantic] = useState<SemanticMatch[]>([])
+  // null = поиск не запускали (показываем всё), массив — результаты поиска
+  // (пустой массив = искали и не нашли, а не «выключить поиск»)
+  const [semantic, setSemantic] = useState<SemanticMatch[] | null>(null)
   const [smartStatus, setSmartStatus] = useState<
     '' | 'loading' | 'error' | 'unavailable' | 'cooldown'
   >('')
@@ -74,7 +76,7 @@ export default function TraitsBrowser({ traits }: TraitsBrowserProps) {
   const visible = useMemo(() => {
     let list = filterTraits(traits, filters)
 
-    if (semantic.length > 0) {
+    if (semantic !== null) {
       const order = new Map(semantic.map((match, index) => [match.id, index]))
       list = list.filter((trait) => order.has(trait.id))
       if (sort === 'score') {
@@ -89,10 +91,10 @@ export default function TraitsBrowser({ traits }: TraitsBrowserProps) {
     return list
   }, [traits, filters, sort, semantic])
 
-  const activeCount = activeTraitFiltersCount(filters) + (semantic.length > 0 ? 1 : 0)
+  const activeCount = activeTraitFiltersCount(filters) + (semantic !== null ? 1 : 0)
 
   const clearSmart = () => {
-    setSemantic([])
+    setSemantic(null)
     setSmartQuery('')
     setSmartStatus('')
   }
@@ -109,7 +111,7 @@ export default function TraitsBrowser({ traits }: TraitsBrowserProps) {
         body: JSON.stringify({ query, locale, section: 'traits' }),
       })
       if (res.status === 429) {
-        setSemantic([])
+        setSemantic(null)
         setSmartStatus('cooldown')
         return
       }
@@ -118,7 +120,7 @@ export default function TraitsBrowser({ traits }: TraitsBrowserProps) {
 
       if (!res.ok) throw new Error(data?.error || 'smart search failed')
       if (!data.indexed) {
-        setSemantic([])
+        setSemantic(null)
         setSmartStatus('unavailable')
         return
       }
@@ -127,13 +129,13 @@ export default function TraitsBrowser({ traits }: TraitsBrowserProps) {
       setSort('score')
       setSmartStatus('')
     } catch {
-      setSemantic([])
+      setSemantic(null)
       setSmartStatus('error')
     }
   }
 
   const handleSortClick = (mode: UiSortMode) => {
-    if (mode !== 'score' && semantic.length > 0) clearSmart()
+    if (mode !== 'score' && semantic !== null) clearSmart()
     setSort(mode)
   }
 
@@ -203,7 +205,7 @@ export default function TraitsBrowser({ traits }: TraitsBrowserProps) {
         >
           {smartStatus === 'loading' ? t('smart_search_searching') : t('smart_search_button')}
         </button>
-        {semantic.length > 0 && (
+        {semantic !== null && (
           <button
             type="button"
             className={styles.smartClear}
@@ -224,7 +226,7 @@ export default function TraitsBrowser({ traits }: TraitsBrowserProps) {
       {smartStatus === 'unavailable' && (
         <p className={styles.smartStatus}>{t('smart_search_unavailable')}</p>
       )}
-      {smartStatus === '' && semantic.length > 0 && (
+      {smartStatus === '' && semantic !== null && semantic.length > 0 && (
         <p className={styles.smartStatus}>{t('smart_search_results', { count: semantic.length })}</p>
       )}
 
@@ -257,7 +259,7 @@ export default function TraitsBrowser({ traits }: TraitsBrowserProps) {
             type="button"
             className={`${styles.sortButton} ${sort === 'score' ? styles.sortButtonActive : ''}`}
             onClick={() => handleSortClick('score')}
-            disabled={semantic.length === 0}
+            disabled={semantic === null || semantic.length === 0}
           >
             {t('by_score')}
           </button>

@@ -65,7 +65,9 @@ export default function SpellsBrowser({ spells }: SpellsBrowserProps) {
 
   // умный поиск
   const [smartQuery, setSmartQuery] = useState('')
-  const [semantic, setSemantic] = useState<SemanticMatch[]>([])
+  // null = поиск не запускали (показываем всё), массив — результаты поиска
+  // (пустой массив = искали и не нашли, а не «выключить поиск»)
+  const [semantic, setSemantic] = useState<SemanticMatch[] | null>(null)
   const [smartStatus, setSmartStatus] = useState<
     '' | 'loading' | 'error' | 'unavailable' | 'cooldown'
   >('')
@@ -75,7 +77,7 @@ export default function SpellsBrowser({ spells }: SpellsBrowserProps) {
   const visible = useMemo(() => {
     let list = filterSpells(spells, filters)
 
-    if (semantic.length > 0) {
+    if (semantic !== null) {
       const order = new Map(semantic.map((match, index) => [match.id, index]))
       list = list.filter((spell) => order.has(spell.id))
       if (sort === 'score') {
@@ -90,10 +92,10 @@ export default function SpellsBrowser({ spells }: SpellsBrowserProps) {
     return list
   }, [spells, filters, sort, semantic])
 
-  const activeCount = activeFiltersCount(filters) + (semantic.length > 0 ? 1 : 0)
+  const activeCount = activeFiltersCount(filters) + (semantic !== null ? 1 : 0)
 
   const clearSmart = () => {
-    setSemantic([])
+    setSemantic(null)
     setSmartQuery('')
     setSmartStatus('')
   }
@@ -110,7 +112,7 @@ export default function SpellsBrowser({ spells }: SpellsBrowserProps) {
         body: JSON.stringify({ query, locale }),
       })
       if (res.status === 429) {
-        setSemantic([])
+        setSemantic(null)
         setSmartStatus('cooldown')
         return
       }
@@ -119,7 +121,7 @@ export default function SpellsBrowser({ spells }: SpellsBrowserProps) {
 
       if (!res.ok) throw new Error(data?.error || 'smart search failed')
       if (!data.indexed) {
-        setSemantic([])
+        setSemantic(null)
         setSmartStatus('unavailable')
         return
       }
@@ -128,13 +130,13 @@ export default function SpellsBrowser({ spells }: SpellsBrowserProps) {
       setSort('score')
       setSmartStatus('')
     } catch {
-      setSemantic([])
+      setSemantic(null)
       setSmartStatus('error')
     }
   }
 
   const handleSortClick = (mode: UiSortMode) => {
-    if (mode !== 'score' && semantic.length > 0) clearSmart()
+    if (mode !== 'score' && semantic !== null) clearSmart()
     setSort(mode)
   }
 
@@ -209,7 +211,7 @@ export default function SpellsBrowser({ spells }: SpellsBrowserProps) {
         >
           {smartStatus === 'loading' ? t('smart_search_searching') : t('smart_search_button')}
         </button>
-        {semantic.length > 0 && (
+        {semantic !== null && (
           <button
             type="button"
             className={styles.smartClear}
@@ -230,7 +232,7 @@ export default function SpellsBrowser({ spells }: SpellsBrowserProps) {
       {smartStatus === 'unavailable' && (
         <p className={styles.smartStatus}>{t('smart_search_unavailable')}</p>
       )}
-      {smartStatus === '' && semantic.length > 0 && (
+      {smartStatus === '' && semantic !== null && semantic.length > 0 && (
         <p className={styles.smartStatus}>{t('smart_search_results', { count: semantic.length })}</p>
       )}
 
@@ -270,7 +272,7 @@ export default function SpellsBrowser({ spells }: SpellsBrowserProps) {
             type="button"
             className={`${styles.sortButton} ${sort === 'score' ? styles.sortButtonActive : ''}`}
             onClick={() => handleSortClick('score')}
-            disabled={semantic.length === 0}
+            disabled={semantic === null || semantic.length === 0}
           >
             {t('by_score')}
           </button>

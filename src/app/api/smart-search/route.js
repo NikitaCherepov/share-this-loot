@@ -54,7 +54,9 @@ function getCandidateTexts(section, locale, ids) {
  *      оценивается относительно запроса, сортируется по score, явно нерелевантные
  *      (ниже RERANK_MIN_SCORE) отбрасываются, возвращается топ-RERANK_TOP_N.
  *
- * Без реранкера (или если он упал) — обычный embedding-топ EMBEDDING_TOP_N.
+ * Без реранкера — обычный embedding-топ EMBEDDING_TOP_N.
+ * Ошибка реранкера → 500 с текстом ошибки (фоллбэка нет, ошибка видна в network).
+ * Пустой ответ реранкера → пустой results («не найдено»).
  */
 export async function POST(request) {
   const body = await request.json().catch(() => ({}))
@@ -105,39 +107,42 @@ export async function POST(request) {
     )
   }
 
-  // fallback-вариант: топ по косинусной близости
+  // без реранкера — обычный топ по косинусной близости
   let results = rankBySimilarity(queryVector, vectors, EMBEDDING_TOP_N)
 
   const rerankConfig = getRerankConfig()
   if (rerankConfig.url && rerankConfig.model) {
-    try {
-      // 1-я ступень: кандидаты по эмбеддингам
-      const candidates = rankBySimilarity(queryVector, vectors, RERANK_CANDIDATES)
-      const texts = getCandidateTexts(
-        section,
-        locale,
-        candidates.map((candidate) => candidate.id)
-      )
+    // 1-я ступень: кандидаты по эмбеддингам
+    const candidates = rankBySimilarity(queryVector, vectors, RERANK_CANDIDATES)
+    const texts = getCandidateTexts(
+      section,
+      locale,
+      candidates.map((candidate) => candidate.id)
+    )
 
-      // 2-я ступень: реранк относительно исходного запроса
-      const ranked = await rerankDocuments(
+    // 2-я ступень: реранк относительно исходного запроса
+    let ranked
+    try {
+      ranked = await rerankDocuments(
         query,
         texts.map((candidate) => candidate.text),
         RERANK_TOP_N,
         rerankConfig
       )
-
-      const reranked = ranked
-        // отбрасываем явно нерелевантных и битые индексы
-        .filter((entry) => entry.score >= rerankConfig.minScore)
-        .map((entry) => ({ id: texts[entry.index]?.id, score: entry.score }))
-        .filter((entry) => entry.id !== undefined)
-
-      if (reranked.length > 0) results = reranked
     } catch (error) {
-      // реранкер упал — не беда, отдаём embedding-топ
-      console.error('rerank failed, falling back to embeddings:', error?.message)
+      // ошибка реранкера — показываем её, фоллбэка нет
+      return NextResponse.json(
+        { error: error?.message ? String(error.message) : 'rerank failed' },
+        { status: 500 }
+      )
     }
+
+    // пустой список — честное «не найдено»
+    results = ranked
+      // отбрасываем явно нерелевантных и битые индексы
+      .filter((entry) => entry.score >= rerankConfig.minScore)
+      .map((entry) => ({ id: texts[entry.index]?.id, score: entry.score }))
+      .filter((entry) => entry.id !== undefined)
   }
 
   return NextResponse.json({ results, indexed: vectors.length })

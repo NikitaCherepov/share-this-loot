@@ -6,14 +6,24 @@
  * Ответ (любой из вариантов):
  *   [{ index, score }]
  *   { results: [{ index, relevance_score }] }
+ *
+ * Пустой массив — валидный ответ («релевантных нет»).
+ * Кривой формат — ошибка (не молчим).
  */
 
 /**
  * Достаёт и нормализует список оценок из ответа реранкера.
  * Сортирует по убыванию score. Чистая функция — её проверяем тестами.
+ * @throws на неожиданном формате ответа
  */
 export function parseRerankResponse(json) {
-  const raw = Array.isArray(json) ? json : Array.isArray(json?.results) ? json.results : []
+  const raw = Array.isArray(json) ? json : Array.isArray(json?.results) ? json.results : null
+
+  if (raw === null) {
+    throw new Error(
+      `Rerank API: неожиданный формат ответа: ${JSON.stringify(json).slice(0, 200)}`
+    )
+  }
 
   return raw
     .map((entry) => ({
@@ -30,7 +40,7 @@ export function parseRerankResponse(json) {
 
 /**
  * Отправляет кандидатов на реранк.
- * @returns {Promise<Array<{ index: number, score: number }>>}
+ * @returns {Promise<Array<{ index: number, score }>>}
  */
 export async function rerankDocuments(query, documents, topN, { url, model, apiKey }) {
   const res = await fetch(url, {
@@ -42,10 +52,20 @@ export async function rerankDocuments(query, documents, topN, { url, model, apiK
     body: JSON.stringify({ model, query, documents, top_n: topN }),
   })
 
+  const text = await res.text()
+
   if (!res.ok) {
-    const body = await res.text().catch(() => '')
-    throw new Error(`Rerank API ${res.status}: ${body.slice(0, 300)}`)
+    throw new Error(`Rerank API ${res.status}: ${text.slice(0, 300)}`)
   }
 
-  return parseRerankResponse(await res.json())
+  let json
+  try {
+    json = JSON.parse(text)
+  } catch {
+    throw new Error(
+      `Rerank API вернул не JSON (начало: ${text.slice(0, 80).replace(/\s+/g, ' ')}) — проверь RERANK_API_URL`
+    )
+  }
+
+  return parseRerankResponse(json)
 }
